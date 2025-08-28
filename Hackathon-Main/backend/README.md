@@ -299,31 +299,152 @@ For API issues or questions, contact the backend team.
 
 ---
 
+
+
+---
+
 ## 🎯 Quick Start Examples
 
-### Python Example:
+### Flask Application Example:
 ```python
+from flask import Flask, request, jsonify
 import requests
 
+app = Flask(__name__)
 BASE_URL = "http://localhost:5001/api"
 
-# 1. Register a user
-response = requests.post(f"{BASE_URL}/register", json={
-    "name": "Test User",
-    "gender": "Male",
-    "dob": "2010-01-01",
-    "role": "Student",
-    "password": "test123"
-})
-sha1_id = response.json()["sha1_id"]
+@app.route('/test-backend', methods=['GET'])
+def test_backend_apis():
+    """Example function showing how to use the backend APIs from another Flask app"""
+    
+    try:
+        # 1. Test connection to backend
+        health_response = requests.get(BASE_URL)
+        if health_response.status_code != 200:
+            return jsonify({"error": "Backend server not available"}), 500
+        
+        # 2. Register a new student
+        register_data = {
+            "name": "Rahul Sharma",
+            "gender": "Male",
+            "dob": "2012-08-15",
+            "role": "Student",
+            "password": "rahul123"
+        }
+        
+        register_response = requests.post(f"{BASE_URL}/register", json=register_data)
+        if register_response.status_code != 201:
+            return jsonify({"error": "Registration failed", "details": register_response.json()}), 400
+        
+        sha1_id = register_response.json()["sha1_id"]
+        
+        # 3. Mark attendance for the student
+        attendance_data = {
+            "sha1_id": sha1_id,
+            "class": "5B"
+        }
+        
+        attendance_response = requests.post(f"{BASE_URL}/attendance", json=attendance_data)
+        if attendance_response.status_code != 200:
+            return jsonify({"error": "Attendance marking failed", "details": attendance_response.json()}), 400
+        
+        # 4. Get attendance records
+        attendance_records = requests.get(f"{BASE_URL}/attendance/{sha1_id}").json()
+        
+        return jsonify({
+            "status": "success",
+            "student_id": sha1_id,
+            "attendance_result": attendance_response.json(),
+            "attendance_records": attendance_records
+        })
+        
+    except requests.exceptions.ConnectionError:
+        return jsonify({"error": "Cannot connect to backend server"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-# 2. Mark attendance
-requests.post(f"{BASE_URL}/attendance", json={
-    "sha1_id": sha1_id,
-    "class": "5B"
-})
+if __name__ == '__main__':
+    app.run(debug=True, port=5002)
+```
 
-# 3. Check attendance
-attendance = requests.get(f"{BASE_URL}/attendance/{sha1_id}").json()
-print(attendance)
+### Simple Flask Integration Example:
+```python
+from flask import Flask, request, jsonify
+import requests
+
+app = Flask(__name__)
+BACKEND_URL = "http://localhost:5001/api"
+
+@app.route('/frontend/login', methods=['POST'])
+def frontend_login():
+    """Frontend login endpoint that connects to our backend"""
+    data = request.get_json()
+    
+    # Forward login request to our backend
+    response = requests.post(f"{BACKEND_URL}/login", json=data)
+    
+    # Return the same response we got from backend
+    return jsonify(response.json()), response.status_code
+
+@app.route('/frontend/attendance', methods=['POST'])
+def frontend_mark_attendance():
+    """Frontend endpoint to mark attendance"""
+    data = request.get_json()
+    
+    # Forward attendance request to our backend
+    response = requests.post(f"{BACKEND_URL}/attendance", json=data)
+    
+    return jsonify(response.json()), response.status_code
+
+@app.route('/frontend/attendance/<sha1_id>', methods=['GET'])
+def frontend_get_attendance(sha1_id):
+    """Frontend endpoint to get attendance data"""
+    response = requests.get(f"{BACKEND_URL}/attendance/{sha1_id}")
+    return jsonify(response.json()), response.status_code
+```
+
+### Example Usage in Flask Routes:
+```python
+@app.route('/student/dashboard/<sha1_id>')
+def student_dashboard(sha1_id):
+    """Example dashboard route that uses our backend APIs"""
+    try:
+        # Get student attendance data from our backend
+        attendance_response = requests.get(f"http://localhost:5001/api/attendance/{sha1_id}")
+        attendance_data = attendance_response.json()
+        
+        if attendance_data["status"] == "success":
+            return f"""
+            <h1>Student Dashboard</h1>
+            <p>Name: {attendance_data['student_info']['name']}</p>
+            <p>Class: {attendance_data['student_info']['current_class']}</p>
+            <p>Attendance: {attendance_data['attendance_summary']['attendance_percentage']}%</p>
+            """
+        else:
+            return "Error loading attendance data", 500
+            
+    except requests.exceptions.RequestException:
+        return "Backend service unavailable", 503
+```
+
+### Testing the Backend from Flask Shell:
+```bash
+# Start Flask shell
+flask shell
+
+# Test the backend APIs
+>>> import requests
+>>> base_url = "http://localhost:5001/api"
+
+# Test health endpoint
+>>> response = requests.get(base_url)
+>>> print(response.json())
+
+# Test getting all students
+>>> response = requests.get(f"{base_url}/students")
+>>> print(response.json())
+
+# Test getting classes
+>>> response = requests.get(f"{base_url}/classes")
+>>> print(response.json())
 ```
