@@ -1,7 +1,3 @@
-Absolutely! Here's the corrected README that only includes the APIs you've actually implemented:
-
----
-
 # Backend API Documentation - Automated Attendance System
 
 ## 📋 Overview
@@ -331,5 +327,3 @@ requests.post(f"{BASE_URL}/attendance", json={
 attendance = requests.get(f"{BASE_URL}/attendance/{sha1_id}").json()
 print(attendance)
 ```
-
-This README provides everything your teammates need to use the currently implemented backend APIs!
