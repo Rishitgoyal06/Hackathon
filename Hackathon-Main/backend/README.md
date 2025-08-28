@@ -303,148 +303,234 @@ For API issues or questions, contact the backend team.
 
 ---
 
-## 🎯 Quick Start Examples
+Absolutely! Here's a practical example of how your frontend teammates can integrate with your backend APIs:
 
-### Flask Application Example:
-```python
-from flask import Flask, request, jsonify
-import requests
+---
 
-app = Flask(__name__)
-BASE_URL = "http://localhost:5001/api"
+## 🎯 Frontend Integration Example
 
-@app.route('/test-backend', methods=['GET'])
-def test_backend_apis():
-    """Example function showing how to use the backend APIs from another Flask app"""
-    
-    try:
-        # 1. Test connection to backend
-        health_response = requests.get(BASE_URL)
-        if health_response.status_code != 200:
-            return jsonify({"error": "Backend server not available"}), 500
+### HTML Registration Form (register.html)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration</title>
+    <style>
+        .container { max-width: 500px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; }
+        .success { color: green; margin-top: 10px; }
+        .error { color: red; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Student Registration</h2>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label>Full Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label>Gender:</label>
+                <select id="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date of Birth:</label>
+                <input type="date" id="dob" required>
+            </div>
+            <div class="form-group">
+                <label>Class:</label>
+                <input type="text" id="class" placeholder="e.g., 5B" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Register</button>
+        </form>
         
-        # 2. Register a new student
-        register_data = {
-            "name": "Rahul Sharma",
-            "gender": "Male",
-            "dob": "2012-08-15",
-            "role": "Student",
-            "password": "rahul123"
-        }
-        
-        register_response = requests.post(f"{BASE_URL}/register", json=register_data)
-        if register_response.status_code != 201:
-            return jsonify({"error": "Registration failed", "details": register_response.json()}), 400
-        
-        sha1_id = register_response.json()["sha1_id"]
-        
-        # 3. Mark attendance for the student
-        attendance_data = {
-            "sha1_id": sha1_id,
-            "class": "5B"
-        }
-        
-        attendance_response = requests.post(f"{BASE_URL}/attendance", json=attendance_data)
-        if attendance_response.status_code != 200:
-            return jsonify({"error": "Attendance marking failed", "details": attendance_response.json()}), 400
-        
-        # 4. Get attendance records
-        attendance_records = requests.get(f"{BASE_URL}/attendance/{sha1_id}").json()
-        
-        return jsonify({
-            "status": "success",
-            "student_id": sha1_id,
-            "attendance_result": attendance_response.json(),
-            "attendance_records": attendance_records
-        })
-        
-    except requests.exceptions.ConnectionError:
-        return jsonify({"error": "Cannot connect to backend server"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        <div id="result" class="success" style="display: none;"></div>
+    </div>
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5002)
-```
-
-### Simple Flask Integration Example:
-```python
-from flask import Flask, request, jsonify
-import requests
-
-app = Flask(__name__)
-BACKEND_URL = "http://localhost:5001/api"
-
-@app.route('/frontend/login', methods=['POST'])
-def frontend_login():
-    """Frontend login endpoint that connects to our backend"""
-    data = request.get_json()
-    
-    # Forward login request to our backend
-    response = requests.post(f"{BACKEND_URL}/login", json=data)
-    
-    # Return the same response we got from backend
-    return jsonify(response.json()), response.status_code
-
-@app.route('/frontend/attendance', methods=['POST'])
-def frontend_mark_attendance():
-    """Frontend endpoint to mark attendance"""
-    data = request.get_json()
-    
-    # Forward attendance request to our backend
-    response = requests.post(f"{BACKEND_URL}/attendance", json=data)
-    
-    return jsonify(response.json()), response.status_code
-
-@app.route('/frontend/attendance/<sha1_id>', methods=['GET'])
-def frontend_get_attendance(sha1_id):
-    """Frontend endpoint to get attendance data"""
-    response = requests.get(f"{BACKEND_URL}/attendance/{sha1_id}")
-    return jsonify(response.json()), response.status_code
-```
-
-### Example Usage in Flask Routes:
-```python
-@app.route('/student/dashboard/<sha1_id>')
-def student_dashboard(sha1_id):
-    """Example dashboard route that uses our backend APIs"""
-    try:
-        # Get student attendance data from our backend
-        attendance_response = requests.get(f"http://localhost:5001/api/attendance/{sha1_id}")
-        attendance_data = attendance_response.json()
-        
-        if attendance_data["status"] == "success":
-            return f"""
-            <h1>Student Dashboard</h1>
-            <p>Name: {attendance_data['student_info']['name']}</p>
-            <p>Class: {attendance_data['student_info']['current_class']}</p>
-            <p>Attendance: {attendance_data['attendance_summary']['attendance_percentage']}%</p>
-            """
-        else:
-            return "Error loading attendance data", 500
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-    except requests.exceptions.RequestException:
-        return "Backend service unavailable", 503
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                gender: document.getElementById('gender').value,
+                dob: document.getElementById('dob').value,
+                role: 'Student', // Fixed role for students
+                password: document.getElementById('password').value
+            };
+            
+            try {
+                // Call YOUR backend API
+                const response = await fetch('http://localhost:5001/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Show success message with Student ID
+                    document.getElementById('result').innerHTML = `
+                        <h3>Registration Successful!</h3>
+                        <p><strong>Student Name:</strong> ${formData.name}</p>
+                        <p><strong>Student ID:</strong> ${result.sha1_id}</p>
+                        <p><strong>Class:</strong> ${document.getElementById('class').value}</p>
+                        <p style="color: red;">Please save this Student ID for login!</p>
+                    `;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('result').className = 'success';
+                    
+                    // Clear form
+                    document.getElementById('registrationForm').reset();
+                    
+                } else {
+                    // Show error
+                    document.getElementById('result').textContent = 'Error: ' + result.message;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('result').className = 'error';
+                }
+                
+            } catch (error) {
+                document.getElementById('result').textContent = 'Network error: ' + error.message;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>
 ```
 
-### Testing the Backend from Flask Shell:
-```bash
-# Start Flask shell
-flask shell
+### HTML Login Form (login.html)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Login</title>
+    <style>/* Same styles as above */</style>
+</head>
+<body>
+    <div class="container">
+        <h2>Student Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Student ID:</label>
+                <input type="text" id="sha1_id" placeholder="Your 10-digit Student ID" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <div id="result" style="display: none;"></div>
+        <div id="attendanceData" style="display: none; margin-top: 20px;"></div>
+    </div>
 
-# Test the backend APIs
->>> import requests
->>> base_url = "http://localhost:5001/api"
-
-# Test health endpoint
->>> response = requests.get(base_url)
->>> print(response.json())
-
-# Test getting all students
->>> response = requests.get(f"{base_url}/students")
->>> print(response.json())
-
-# Test getting classes
->>> response = requests.get(f"{base_url}/classes")
->>> print(response.json())
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loginData = {
+                sha1_id: document.getElementById('sha1_id').value,
+                password: document.getElementById('password').value
+            };
+            
+            try {
+                // Call YOUR login API
+                const response = await fetch('http://localhost:5001/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Show welcome message
+                    document.getElementById('result').innerHTML = `
+                        <h3>Welcome, ${result.user.name}!</h3>
+                        <p>Role: ${result.user.role}</p>
+                    `;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('result').className = 'success';
+                    
+                    // Now fetch attendance data
+                    await showAttendanceData(result.user.sha1_id);
+                    
+                } else {
+                    document.getElementById('result').textContent = 'Login failed: ' + result.message;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('result').className = 'error';
+                }
+                
+            } catch (error) {
+                document.getElementById('result').textContent = 'Network error: ' + error.message;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').className = 'error';
+            }
+        });
+        
+        async function showAttendanceData(sha1_id) {
+            try {
+                // Call YOUR attendance API
+                const response = await fetch(`http://localhost:5001/api/attendance/${sha1_id}`);
+                const attendance = await response.json();
+                
+                if (attendance.status === 'success') {
+                    document.getElementById('attendanceData').innerHTML = `
+                        <h3>Attendance Summary</h3>
+                        <p><strong>Total Classes:</strong> ${attendance.attendance_summary.total_classes_held}</p>
+                        <p><strong>Classes Attended:</strong> ${attendance.attendance_summary.classes_attended}</p>
+                        <p><strong>Attendance Percentage:</strong> ${attendance.attendance_summary.attendance_percentage}%</p>
+                    `;
+                    document.getElementById('attendanceData').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching attendance:', error);
+            }
+        }
+    </script>
+</body>
+</html>
 ```
+
+### How Your Teammates Will Use Your APIs:
+
+1. **Registration Flow:**
+   - User fills form → Frontend calls `POST /api/register`
+   - Your backend returns `sha1_id` → Frontend displays it to user
+   - User saves this ID for future logins
+
+2. **Login Flow:**
+   - User enters `sha1_id` and password → Frontend calls `POST /api/login`
+   - Your backend validates → Returns user data
+   - Frontend then calls `GET /api/attendance/{sha1_id}` to show attendance
+
+3. **Attendance Display:**
+   - Frontend receives attendance data from your API
+   - Displays it in a user-friendly format
+
+### Key Points for Frontend Team:
+- **Base URL:** `http://localhost:5001/api`
+- **Required Headers:** `Content-Type: application/json`
+- **Error Handling:** Always check `response.status` and `response.json().status`
+- **Data Flow:** Register → Get `sha1_id` → Use `sha1_id` for all future requests
