@@ -1,0 +1,6 @@
+numpy
+opencv-python
+dlib
+scipy
+face-recognition
+sqlite3
