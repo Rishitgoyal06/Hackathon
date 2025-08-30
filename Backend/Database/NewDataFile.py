@@ -14,6 +14,17 @@ def create_db():
         password TEXT NOT NULL
     )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Students (
+            UniqueShaID INTEGER PRIMARY KEY,
+            Name TEXT NOT NULL,
+            RollNumber INTEGER NOT NULL,
+            DOB TEXT,
+            Class TEXT NOT NULL,
+            Gender TEXT NOT NULL,
+            Phone INTEGER
+        )
+    ''')
     # Create Face Encodings table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS face_encodings (
@@ -30,20 +41,6 @@ def create_db():
             days_present INTEGER
         )
     ''')
-
-    # Example user data
-    user_id = "1234567890"
-    name = "Vaibhav"
-    role = "student"
-    email = "vaibhav@email.com"
-    password = "12345"
-
-    cursor.execute('''
-        INSERT INTO users (id, name, role, email, password)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (user_id, name, role, email, password))
-    conn.commit()
-    conn.close()
     print("Database created successfully!")
 
 if __name__ == "__main__":

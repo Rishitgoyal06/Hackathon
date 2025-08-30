@@ -3,6 +3,7 @@ import face_recognition
 import pickle
 import os
 import sqlite3
+import numpy as np
 
 # Step 1: Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -10,13 +11,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Step 2: Go up one folder (to Backend)
 PARENT_DIR = os.path.dirname(BASE_DIR)
 
-# Step 3: Point to Database/school.db
+# Step 3: Point to Database/school_portal.db
 db_path = os.path.join(PARENT_DIR, "Database", "school_portal.db")
 
 print("Using database path:", db_path)
 
-# Step 4: Connect
-connection = sqlite3.connect(db_path)
+# Step 4: Create encodings table if not exists
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS face_encodings (
+    id INTEGER PRIMARY KEY,
+    encoding BLOB NOT NULL
+)
+""")
+conn.commit()
+conn.close()
 
 # Importing student images
 folderPath = os.path.join("Images")
@@ -70,33 +80,27 @@ if len(encodeListKnown) == 0:
 else:
     print("Encoding Complete")
 
-    # Save encodings to a file
+    # Save encodings to a file (backup)
     with open("EncodeFile.p", 'wb') as file:
         pickle.dump([encodeListKnown, studentIds], file)
     print("File Saved (EncodeFile.p)")
 
-    # Save encodings to SQLite3 database
-    try:
-        connection = sqlite3.connect(db_path)
-        cursor = connection.cursor()
-        print("Connected to SQLite database")
+    # Save encodings to DB
+    def save_encoding_to_db(student_id, encoding):
+        """Save face encoding for a student into DB"""
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-        # Insert/update encodings into face_encodings
-        for student_id, encoding in zip(studentIds, encodeListKnown):
-            cursor.execute('''
-                INSERT INTO face_encodings (id, encoding)
-                VALUES (?, ?)
-                ON CONFLICT(id) DO UPDATE SET encoding=excluded.encoding
-            ''', (student_id, pickle.dumps(encoding)))
+        # Convert numpy array → bytes
+        encoding_bytes = encoding.astype(np.float64).tobytes()
 
-        connection.commit()
-        print("Encodings inserted into face_encodings table successfully")
+        cursor.execute("INSERT OR REPLACE INTO face_encodings (id, encoding) VALUES (?, ?)",
+                       (student_id, encoding_bytes))
 
-    except Exception as e:
-        print(f"Error: {e}")
+        conn.commit()
+        conn.close()
 
-    finally:
-        if connection:
-            cursor.close()
-            connection.close()
-            print("SQLite connection closed")
+    # Loop over each student and save encoding
+    for student_id, encoding in zip(studentIds, encodeListKnown):
+        save_encoding_to_db(student_id, encoding)
+        print(f"Saved encoding for {student_id} to DB")

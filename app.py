@@ -1,6 +1,8 @@
+import json
+import subprocess
 import sys
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_cors import CORS
 from Backend.FaceRecognition.FaceMain import run_face_attendance
 import os
@@ -9,7 +11,7 @@ CORS(app)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 @app.route('/')
 def login():
-    return render_template('newUser.html')
+    return render_template('login.html')
 
 @app.route('/teacher')
 def teacher():
@@ -20,10 +22,25 @@ def student():
     return render_template('student.html')
 
 # API endpoints - placeholders for future implementation
-@app.route('/api/students/add', methods=['POST'])
-def add_student():
-    return jsonify({'status': 'success', 'message': 'Add student endpoint - Flask integration pending'})
+@app.route('/submit', methods=['POST'])
+def submit_form():
+    # Form data lelo
+    data = {
+        "name": request.form.get("name"),
+        "rollno": request.form.get("rollno"),
+        "dob": request.form.get("dob"),
+        "class": request.form.get("class"),
+        "gender": request.form.get("gender"),
+        "phone": request.form.get("phone")
+    }
 
+    # Data ko JSON me convert karke dusri python file ko bhejna
+    subprocess.run(["python", "Backend/Database/FetchDetailofForm.py", json.dumps(data)])
+
+    return redirect(url_for('newUser'))
+@app.route("/newUser")
+def newUser():
+    return render_template("newUser.html")
 
 @app.route('/attendance-mark', methods=['GET', 'POST'])
 def mark_attendance_api():
