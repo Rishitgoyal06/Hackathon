@@ -8,3 +8,5 @@ flask-cors
 matplotlib
 plotly
 kaleido
+gunicorn
+dlib
