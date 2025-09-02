@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏛️ Government Reports - Smart Attendance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1)) !important;
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 0 0 25px 25px;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.6rem;
+      background: linear-gradient(45deg, #fff, #ffeaa7, #fab1a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #fff, #ffeaa7, #fab1a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 2rem;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3)); }
+      to { filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.6)); }
+    }
+
+    .report-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 28px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .report-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2rem;
+      color: white;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .class-breakdown {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+
+    .class-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .class-name {
+      color: white;
+      font-weight: 600;
+    }
+
+    .class-count {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-weight: 600;
+    }
+
+    .btn-back {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 0.8rem 2rem;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.25));
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .report-header {
+      text-align: center;
+      color: white;
+      margin-bottom: 2rem;
+    }
+
+    .report-date {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 15px;
+      display: inline-block;
+      margin-top: 1rem;
+    }
+    
+    .language-switcher {
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.4rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .navbar-toggler {
+      padding: 0.25rem 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        margin-top: 1rem;
+        padding: 1rem;
+      }
+      
+      .language-switcher {
+        justify-content: center;
+        width: 100%;
+      }
+      
+
+    }
+    
+    .lang-btn {
+      padding: 0.5rem 0.8rem;
+      background: transparent;
+      border: none;
+      border-radius: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-weight: 700;
+      position: relative;
+      overflow: hidden;
+      min-width: 40px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    
+    .lang-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s;
+    }
+    
+    .lang-btn:hover::before {
+      left: 100%;
+    }
+    
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .lang-btn.active {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .lang-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      border-radius: 2px;
+    }
+    
+    /* Mobile phones (portrait) - 320px to 480px */
+    @media (max-width: 480px) {
+      .hero-title { font-size: 1.8rem !important; line-height: 1.2; }
+      .report-card { padding: 1.5rem !important; margin-bottom: 1.5rem; }
+      .stats-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+      .stat-box { padding: 1.5rem !important; }
+      .stat-icon { width: 60px !important; height: 60px !important; font-size: 1.5rem !important; }
+      .stat-number { font-size: 2rem !important; }
+      .stat-label { font-size: 0.85rem !important; }
+      .class-item { padding: 0.8rem !important; flex-direction: column; text-align: center; }
+      .class-name { margin-bottom: 0.5rem; }
+      .btn-back { padding: 0.6rem 1.5rem !important; font-size: 0.8rem !important; }
+      .container { padding: 0 1rem !important; }
+      .language-switcher { gap: 0.2rem !important; }
+      .lang-btn { padding: 0.3rem 0.5rem !important; font-size: 0.7rem !important; }
+    }
+    
+    /* Mobile phones (landscape) - 481px to 768px */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .hero-title { font-size: 2.2rem !important; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .report-card { padding: 2rem !important; }
+    }
+    
+    /* Tablets (portrait) - 769px to 1024px */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hero-title { font-size: 2.8rem !important; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .container { max-width: 95% !important; }
+    }
+    
+    /* Laptops - 1025px to 1440px */
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .hero-title { font-size: 3.2rem !important; }
+      .container { max-width: 1200px !important; }
+    }
+    
+    /* Large screens/4K - 1441px+ */
+    @media (min-width: 1441px) {
+      .hero-title { font-size: 4rem !important; }
+      .report-card { padding: 3rem !important; }
+      .container { max-width: 1400px !important; }
+    }
+    
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      .btn-back { min-height: 48px; }
+      .lang-btn { min-height: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-landmark me-2"></i><span class="d-none d-sm-inline">{{ get_text('government_reports') }}</span><span class="d-sm-none">Reports</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <i class="fas fa-bars text-white"></i>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto d-flex align-items-lg-center">
+          <div class="language-switcher mt-3 mt-lg-0">
+            <a href="{{ url_for('set_language', lang='en') }}" class="lang-btn {% if current_lang == 'en' %}active{% endif %}">EN</a>
+            <a href="{{ url_for('set_language', lang='hi') }}" class="lang-btn {% if current_lang == 'hi' %}active{% endif %}">हि</a>
+            <a href="{{ url_for('set_language', lang='gu') }}" class="lang-btn {% if current_lang == 'gu' %}active{% endif %}">ગુ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 pt-4">
+    <a href="{{ url_for('admin') }}" class="btn-back mb-4">
+      <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_dashboard') }}
+    </a>
+
+    <h1 class="hero-title">{{ get_text('midday_meal_enrollment') }}</h1>
+
+    <div class="report-header">
+      <h4>{{ get_text('daily_government_report') }}</h4>
+      <div class="report-date">
+        <i class="fas fa-calendar me-2"></i>{{ get_text('report_date') }}: {{ report_date }}
+      </div>
+      <div class="mt-3">
+        <a href="{{ url_for('download_government_report') }}" class="btn-back">
+          <i class="fas fa-download me-2"></i>{{ get_text('download_report') }}
+        </a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-icon bg-primary">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-number">{{ total_students }}</div>
+        <div class="stat-label">{{ get_text('total_students') }}</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-icon bg-success">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <div class="stat-number">{{ present_today }}</div>
+        <div class="stat-label">{{ get_text('students_present_today') }}</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-icon bg-warning">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <div class="stat-number">{{ meals_required }}</div>
+        <div class="stat-label">{{ get_text('meals_required') }}</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-icon bg-info">
+          <i class="fas fa-percentage"></i>
+        </div>
+        <div class="stat-number">
+          {% if total_students > 0 %}
+            {{ "%.1f"|format((present_today / total_students * 100)) }}%
+          {% else %}
+            0%
+          {% endif %}
+        </div>
+        <div class="stat-label">{{ get_text('attendance_rate') }}</div>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <h3 class="text-white text-center mb-4">{{ get_text('class_wise_enrollment') }}</h3>
+      <div class="class-breakdown">
+        {% for class_name, count in class_breakdown %}
+        <div class="class-item">
+          <span class="class-name">
+            <i class="fas fa-graduation-cap me-2"></i>Class {{ class_name }}
+          </span>
+          <span class="class-count">{{ count }} Students</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="report-card">
+      <h3 class="text-white text-center mb-4">{{ get_text('government_summary') }}</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="stat-box">
+            <h5 class="text-white mb-3">
+              <i class="fas fa-school me-2"></i>{{ get_text('school_enrollment') }}
+            </h5>
+            <p class="text-white-50">
+              {{ get_text('our_school_currently') }} <strong class="text-white">{{ total_students }} {{ get_text('students') }}</strong> 
+              {{ get_text('enrolled_across_classes') }} {{ class_breakdown|length }} {{ get_text('different_classes') }}.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="stat-box">
+            <h5 class="text-white mb-3">
+              <i class="fas fa-utensils me-2"></i>{{ get_text('meal_requirements') }}
+            </h5>
+            <p class="text-white-50">
+              {{ get_text('based_todays_attendance') }} <strong class="text-white">{{ meals_required }} {{ get_text('meals_required') }}</strong> 
+              {{ get_text('from_government_program') }}.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function showError(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'alert alert-danger';
+      errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; background: rgba(255,107,107,0.9); color: white; padding: 1rem; border-radius: 10px;';
+      errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => errorDiv.remove(), 5000);
+    }
+
+    const navbar = document.getElementById('navbarNav');
+    if (navbar) {
+      navbar.addEventListener('show.bs.collapse', () => {
+        if (window.innerWidth < 992) document.body.style.paddingTop = '180px';
+      });
+      navbar.addEventListener('hide.bs.collapse', () => {
+        document.body.style.paddingTop = '0';
+      });
+    }
+
+    window.addEventListener('error', function(e) {
+      console.error('Page error:', e.error);
+      showError('An unexpected error occurred');
+    });
+  </script>
+</body>
+</html>

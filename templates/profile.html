@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👤 {{ get_text('profile_manager') }} - {{ get_text('smart_attendance') }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="hexagon" width="20" height="17.32" patternUnits="userSpaceOnUse"><polygon points="10,1 18.66,6 18.66,16 10,21 1.34,16 1.34,6" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23hexagon)"/></svg>');
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border-radius: 0 0 25px 25px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .navbar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #a8edea, #fed6e3, #d299c2, #fef9d7);
+      animation: shimmer 3s linear infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.6rem;
+      background: linear-gradient(45deg, #fff, #a8edea, #fed6e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-brand:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #fff, #a8edea, #fed6e3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 3rem;
+      text-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+      animation: glow 2s ease-in-out infinite alternate;
+      letter-spacing: -2px;
+    }
+    
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3)); }
+      to { filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.6)); }
+    }
+    
+    .profile-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 32px;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: slideUp 0.8s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #a8edea, #fed6e3, #d299c2);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    .form-label {
+      color: white;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .form-control {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      color: white;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(168, 237, 234, 0.8);
+      box-shadow: 0 0 20px rgba(168, 237, 234, 0.3);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-update {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 1rem 2rem;
+      color: white;
+      font-weight: 600;
+      width: 100%;
+      margin-top: 1rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn-update::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.6s;
+    }
+    
+    .btn-update:hover::before {
+      left: 100%;
+    }
+    
+    .btn-update:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.25));
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-back {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 0.8rem 2rem;
+      color: white;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .btn-back:hover {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.25));
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .readonly-field {
+      background: rgba(255, 255, 255, 0.05) !important;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    
+    .orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: drift 15s ease-in-out infinite;
+    }
+    
+    .orb:nth-child(1) { width: 100px; height: 100px; top: 20%; left: 20%; animation-delay: 0s; }
+    .orb:nth-child(2) { width: 60px; height: 60px; top: 60%; right: 30%; animation-delay: 5s; }
+    .orb:nth-child(3) { width: 80px; height: 80px; bottom: 30%; left: 70%; animation-delay: 10s; }
+    
+    @keyframes drift {
+      0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0.3; }
+      25% { transform: translateY(-50px) translateX(30px) rotate(90deg); opacity: 0.8; }
+      50% { transform: translateY(-30px) translateX(-20px) rotate(180deg); opacity: 1; }
+      75% { transform: translateY(-70px) translateX(40px) rotate(270deg); opacity: 0.6; }
+    }
+    
+    .language-switcher {
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.4rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .lang-btn {
+      padding: 0.5rem 0.8rem;
+      background: transparent;
+      border: none;
+      border-radius: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-weight: 700;
+      position: relative;
+      overflow: hidden;
+      min-width: 40px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    
+    .lang-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s;
+    }
+    
+    .lang-btn:hover::before {
+      left: 100%;
+    }
+    
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .lang-btn.active {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .lang-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, #a8edea, #fed6e3);
+      border-radius: 2px;
+    }
+    
+    /* Mobile navbar improvements */
+    .navbar-toggler {
+      padding: 0.25rem 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-toggler:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .navbar-toggler:focus {
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+    }
+    
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .language-switcher {
+        justify-content: center;
+        width: 100%;
+      }
+      
+
+    }
+    
+    @media (max-width: 480px) {
+      .navbar-brand { font-size: 1.2rem !important; }
+      .navbar-toggler { padding: 0.2rem 0.4rem; }
+      .hero-title { font-size: 1.5rem !important; }
+      .profile-card { padding: 1rem !important; margin: 0 0.5rem !important; }
+      .container { padding: 0 0.5rem !important; }
+      .btn-back { padding: 0.5rem 1rem !important; font-size: 0.8rem !important; }
+      .form-control { padding: 0.7rem 1rem !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orbs">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-user-edit me-2"></i><span class="d-none d-sm-inline">{{ get_text('profile_manager') }}</span><span class="d-sm-none">Profile</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon-custom">
+          <i class="fas fa-bars text-white"></i>
+        </span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto d-flex align-items-lg-center">
+          <div class="language-switcher mt-3 mt-lg-0">
+            <a href="{{ url_for('set_language', lang='en') }}" class="lang-btn {% if current_lang == 'en' %}active{% endif %}">EN</a>
+            <a href="{{ url_for('set_language', lang='hi') }}" class="lang-btn {% if current_lang == 'hi' %}active{% endif %}">हि</a>
+            <a href="{{ url_for('set_language', lang='gu') }}" class="lang-btn {% if current_lang == 'gu' %}active{% endif %}">ગુ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 pt-4">
+    <h1 class="hero-title">{{ get_text('update_profile') }}</h1>
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="profile-card">
+          <a href="{{ url_for('student') }}" class="btn-back">
+            <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_dashboard') }}
+          </a>
+          
+          <form id="profileForm">
+            <div class="mb-3">
+              <label class="form-label">{{ get_text('student_id') }}</label>
+              <input type="text" class="form-control readonly-field" value="{{ student.id }}" readonly>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">{{ get_text('class') }}</label>
+              <input type="text" class="form-control readonly-field" value="{{ student.class }}" readonly>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">{{ get_text('roll_number') }}</label>
+              <input type="text" class="form-control readonly-field" value="{{ student.roll }}" readonly>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">{{ get_text('name') }}</label>
+              <input type="text" class="form-control readonly-field" value="{{ student.name }}" readonly>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">{{ get_text('phone_number') }}</label>
+              <input type="tel" class="form-control readonly-field" value="{{ student.phone }}" readonly>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">{{ get_text('new_password') }}</label>
+              <input type="password" name="password" class="form-control" placeholder="{{ get_text('enter_new_password') }}">
+            </div>
+            
+            <button type="submit" class="btn-update">
+              <i class="fas fa-key me-2"></i>{{ get_text('update_password') }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showNotification(message, type = 'success') {
+      const notifDiv = document.createElement('div');
+      notifDiv.className = 'alert';
+      const bgColor = type === 'success' ? 'rgba(40,167,69,0.9)' : 'rgba(255,107,107,0.9)';
+      notifDiv.style.cssText = `position: fixed; top: 20px; right: 20px; z-index: 9999; background: ${bgColor}; color: white; padding: 1rem; border-radius: 10px;`;
+      notifDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>${message}`;
+      document.body.appendChild(notifDiv);
+      setTimeout(() => notifDiv.remove(), 4000);
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const password = document.querySelector('input[name="password"]').value;
+      if (!password.trim()) {
+        showNotification('{{ get_text("password_required") }}', 'error');
+        return;
+      }
+      
+      const formData = new FormData(this);
+      
+      fetch('/update-profile', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Network error');
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === 'success') {
+          showNotification('{{ get_text("password_updated_successfully") }}');
+          document.querySelector('input[name="password"]').value = '';
+        } else {
+          showNotification(data.message || '{{ get_text("error_updating") }}', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('{{ get_text("error_updating") }}', 'error');
+      });
+    });
+  </script>
+  <script>
+    const navbar = document.getElementById('navbarNav');
+    if (navbar) {
+      navbar.addEventListener('show.bs.collapse', () => {
+        if (window.innerWidth < 992) document.body.style.paddingTop = '180px';
+      });
+      navbar.addEventListener('hide.bs.collapse', () => {
+        document.body.style.paddingTop = '0';
+      });
+    }
+  </script>
+</body>
+</html>

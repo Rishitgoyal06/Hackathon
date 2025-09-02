@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎓 Smart Attendance - Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .login-container {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 32px;
+      padding: 3rem;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+      animation: shimmer 3s linear infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .logo-section {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2rem;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .logo-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+    }
+    
+    .logo-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+    
+    .toggle-section {
+      display: flex;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 0.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .toggle-option {
+      flex: 1;
+      padding: 0.8rem 0.5rem;
+      text-align: center;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    
+    .toggle-option.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    .form-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+      font-size: 0.9rem;
+    }
+    
+    .form-control {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1.1rem;
+    }
+    
+    .password-toggle {
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    
+    .password-toggle:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+      border: none;
+      border-radius: 16px;
+      padding: 1rem 2rem;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s;
+    }
+    
+    .login-btn:hover::before {
+      left: 100%;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .forgot-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    
+    .forgot-link a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+    
+    .forgot-link a:hover {
+      color: white;
+    }
+    
+    .language-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    .lang-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .lang-btn:hover, .lang-btn.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .shape:nth-child(1) { width: 100px; height: 100px; top: 20%; left: 10%; animation-delay: 0s; }
+    .shape:nth-child(2) { width: 60px; height: 60px; top: 60%; right: 20%; animation-delay: 3s; }
+    .shape:nth-child(3) { width: 80px; height: 80px; bottom: 30%; left: 70%; animation-delay: 6s; }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+      50% { transform: translateY(-30px) rotate(180deg); opacity: 0.8; }
+    }
+    
+    /* Mobile phones (portrait) - 320px to 480px */
+    @media (max-width: 480px) {
+      .login-container { 
+        margin: 0.5rem; 
+        padding: 1.5rem; 
+        max-width: 95vw;
+        border-radius: 24px;
+      }
+      .logo-title { font-size: 1.4rem; }
+      .logo-subtitle { font-size: 0.85rem; }
+      .logo-icon { width: 60px; height: 60px; font-size: 1.5rem; }
+      .toggle-option { padding: 0.6rem 0.4rem; font-size: 0.8rem; min-height: 48px; }
+      .form-control { padding: 0.8rem 1rem; font-size: 0.9rem; }
+      .login-btn { padding: 0.9rem; font-size: 1rem; }
+      .language-switcher { gap: 0.5rem; flex-wrap: wrap; }
+      .lang-btn { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+    }
+    
+    /* Mobile phones (landscape) - 481px to 768px */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .login-container { 
+        margin: 1rem; 
+        padding: 2rem; 
+        max-width: 85%;
+      }
+      .logo-title { font-size: 1.6rem; }
+      .toggle-option { font-size: 0.85rem; }
+    }
+    
+    /* Tablets (portrait) - 769px to 1024px */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .login-container { 
+        max-width: 500px;
+        padding: 2.5rem;
+      }
+      .logo-title { font-size: 1.8rem; }
+    }
+    
+    /* Laptops - 1025px to 1440px */
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .login-container { 
+        max-width: 450px;
+      }
+    }
+    
+    /* Large screens/4K - 1441px+ */
+    @media (min-width: 1441px) {
+      .login-container { 
+        max-width: 550px;
+        padding: 3.5rem;
+      }
+      .logo-title { font-size: 2.2rem; }
+      .logo-icon { width: 100px; height: 100px; font-size: 2.5rem; }
+    }
+    
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      .toggle-option { min-height: 48px; }
+      .login-btn { min-height: 48px; }
+      .lang-btn { min-height: 44px; }
+      .form-control { min-height: 48px; }
+    }
+    
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .login-container { border-width: 0.5px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="login-container">
+    <div class="logo-section">
+      <div class="logo-icon">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h1 class="logo-title">{{ get_text('smart_attendance') }}</h1>
+      <p class="logo-subtitle">{{ get_text('secure_login_portal') }}</p>
+      
+      <div class="language-switcher mb-3">
+        <a href="{{ url_for('set_language', lang='en') }}" class="lang-btn {% if current_lang == 'en' %}active{% endif %}">English</a>
+        <a href="{{ url_for('set_language', lang='hi') }}" class="lang-btn {% if current_lang == 'hi' %}active{% endif %}">हिंदी</a>
+        <a href="{{ url_for('set_language', lang='gu') }}" class="lang-btn {% if current_lang == 'gu' %}active{% endif %}">ગુજરાતી</a>
+      </div>
+    </div>
+
+    <div class="toggle-section">
+      <div class="toggle-option active" data-type="student">
+        <i class="fas fa-user-graduate me-2"></i>{{ get_text('student') }}
+      </div>
+      <div class="toggle-option" data-type="teacher">
+        <i class="fas fa-chalkboard-teacher me-2"></i>{{ get_text('teacher') }}
+      </div>
+      <div class="toggle-option" data-type="admin">
+        <i class="fas fa-chalkboard-teacher me-2"></i>{{ get_text('admin') }}
+      </div>
+    </div>
+
+    <form id="loginForm" method="POST" action="/login">
+      <input type="hidden" name="role" id="roleInput" value="student">
+      <div class="form-group">
+        <label class="form-label" id="idLabel">{{ get_text('student_id') }}</label>
+        <div class="position-relative">
+          <input type="text" name="userId" class="form-control" id="userId" placeholder="{{ get_text('enter_id') }}" required>
+          <i class="fas fa-id-card input-icon"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ get_text('password') }}</label>
+        <div class="position-relative">
+          <input type="password" name="password" class="form-control" id="password" placeholder="{{ get_text('enter_password') }}" required>
+          <i class="fas fa-eye password-toggle input-icon" id="togglePassword"></i>
+        </div>
+      </div>
+
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt me-2"></i>{{ get_text('login') }}
+      </button>
+    </form>
+
+    <div id="errorMessage" class="alert alert-danger" style="{% if not error %}display: none;{% endif %} background: rgba(255, 107, 107, 0.2); border: 1px solid #ff6b6b; color: #ff6b6b; border-radius: 15px; margin-top: 1rem;">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      Invalid credentials. Please check your ID and password.
+    </div>
+
+    <div class="forgot-link">
+      <a href="#" id="forgotLink">{{ get_text('forgot_password') }}</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggleOptions = document.querySelectorAll('.toggle-option');
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const loginForm = document.getElementById('loginForm');
+    const roleInput = document.getElementById('roleInput');
+
+    // Toggle between roles (student / teacher / admin)
+    toggleOptions.forEach(option => {
+      option.addEventListener('click', function() {
+        toggleOptions.forEach(opt => opt.classList.remove('active'));
+        this.classList.add('active');
+        roleInput.value = this.dataset.type; // update hidden input
+        
+        // Hide error message when switching roles
+        if (errorMessage) {
+          errorMessage.style.display = 'none';
+        }
+        
+        // Update label and placeholder based on role
+        const idLabel = document.getElementById('idLabel');
+        const userIdInput = document.getElementById('userId');
+        const forgotLink = document.querySelector('.forgot-link');
+        
+        const translations = {
+          'student': { 'en': 'Student ID', 'hi': 'छात्र आईडी', 'gu': 'વિદ્યાર્થી આઈડી' },
+          'teacher': { 'en': 'Teacher ID', 'hi': 'शिक्षक आईडी', 'gu': 'શિક્ષક આઈડી' },
+          'admin': { 'en': 'Admin ID', 'hi': 'प्रशासक आईडी', 'gu': 'વહીવટકર્તા આઈડી' }
+        };
+        
+        const placeholders = {
+          'student': { 'en': 'Enter your Student ID', 'hi': 'अपनी छात्र आईडी दर्ज करें', 'gu': 'તમારી વિદ્યાર્થી આઈડી દાખલ કરો' },
+          'teacher': { 'en': 'Enter your Teacher ID', 'hi': 'अपनी शिक्षक आईडी दर्ज करें', 'gu': 'તમારી શિક્ષક આઈડી દાખલ કરો' },
+          'admin': { 'en': 'Enter your Admin ID', 'hi': 'अपनी प्रशासक आईडी दर्ज करें', 'gu': 'તમારી વહીવટકર્તા આઈડી દાખલ કરો' }
+        };
+        
+        const currentLang = '{{ current_lang }}';
+        const roleType = this.dataset.type;
+        
+        idLabel.textContent = translations[roleType][currentLang];
+        userIdInput.placeholder = placeholders[roleType][currentLang];
+        
+        if (roleType === 'admin') {
+          forgotLink.style.display = 'none';
+        } else {
+          forgotLink.style.display = 'block';
+        }
+      });
+    });
+
+    // Password visibility toggle
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    // 🚀 Submit directly to Flask backend
+    loginForm.addEventListener('submit', function() {
+      // no preventDefault — let the form POST to /login
+    });
+
+    // Add input focus effects and hide error on typing
+    const inputs = document.querySelectorAll('.form-control');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'scale(1.02)';
+      });
+      input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'scale(1)';
+      });
+      input.addEventListener('input', function() {
+        if (errorMessage) {
+          errorMessage.style.display = 'none';
+        }
+      });
+    });
+
+    // Forgot password handler
+    document.getElementById('forgotLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      const message = '{{ get_text("contact_admin") }}';
+      alert(message);
+    });
+  });
+</script>
+</body>
+</html>

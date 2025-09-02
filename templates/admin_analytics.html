@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Admin Analytics - Smart Attendance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1)) !important;
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 0 0 25px 25px;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.6rem;
+      background: linear-gradient(45deg, #fff, #ffeaa7, #fab1a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #fff, #ffeaa7, #fab1a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 2rem;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3)); }
+      to { filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.6)); }
+    }
+
+    .analytics-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 28px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-section {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-select {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      color: white;
+      padding: 0.8rem 1rem;
+    }
+
+    .form-select:focus {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    .form-select option {
+      background: #2c3e50;
+      color: white;
+    }
+
+    .student-row {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .student-row:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .percentage-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .percentage-high { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+    .percentage-medium { background: linear-gradient(45deg, #f39c12, #e67e22); }
+    .percentage-low { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+
+    .btn-back {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 0.8rem 2rem;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.25));
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .class-badge {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .language-switcher {
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.4rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .navbar-toggler {
+      padding: 0.25rem 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        margin-top: 1rem;
+        padding: 1rem;
+      }
+      
+      .language-switcher {
+        justify-content: center;
+        width: 100%;
+      }
+      
+
+    }
+    
+    .lang-btn {
+      padding: 0.5rem 0.8rem;
+      background: transparent;
+      border: none;
+      border-radius: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-weight: 700;
+      position: relative;
+      overflow: hidden;
+      min-width: 40px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    
+    .lang-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s;
+    }
+    
+    .lang-btn:hover::before {
+      left: 100%;
+    }
+    
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .lang-btn.active {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .lang-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      border-radius: 2px;
+    }
+    
+    /* Mobile phones (portrait) - 320px to 480px */
+    @media (max-width: 480px) {
+      .hero-title { font-size: 1.8rem !important; line-height: 1.2; }
+      .analytics-card { padding: 1.5rem !important; margin-bottom: 1.5rem; }
+      .filter-section { padding: 1rem !important; }
+      .filter-section .row { flex-direction: column !important; }
+      .filter-section .col-md-3, .filter-section .col-md-4, .filter-section .col-md-5 { margin-bottom: 1rem; }
+      .form-select { padding: 0.6rem 0.8rem !important; font-size: 0.9rem !important; }
+      .student-row { padding: 0.8rem !important; }
+      .student-row .row { flex-direction: column !important; text-align: center; }
+      .student-row .col-md-1, .student-row .col-md-2, .student-row .col-md-3 { margin-bottom: 0.5rem; }
+      .percentage-badge { padding: 0.3rem 0.8rem !important; font-size: 0.8rem !important; }
+      .class-badge { padding: 0.2rem 0.6rem !important; font-size: 0.8rem !important; }
+      .btn-back { padding: 0.6rem 1.5rem !important; font-size: 0.8rem !important; }
+      .container { padding: 0 1rem !important; }
+      .language-switcher { gap: 0.2rem !important; }
+      .lang-btn { padding: 0.3rem 0.5rem !important; font-size: 0.7rem !important; }
+    }
+    
+    /* Mobile phones (landscape) - 481px to 768px */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .hero-title { font-size: 2.2rem !important; }
+      .analytics-card { padding: 2rem !important; }
+      .student-row .row { flex-wrap: wrap; }
+    }
+    
+    /* Tablets (portrait) - 769px to 1024px */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hero-title { font-size: 2.8rem !important; }
+      .container { max-width: 95% !important; }
+    }
+    
+    /* Laptops - 1025px to 1440px */
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .hero-title { font-size: 3.2rem !important; }
+      .container { max-width: 1200px !important; }
+    }
+    
+    /* Large screens/4K - 1441px+ */
+    @media (min-width: 1441px) {
+      .hero-title { font-size: 4rem !important; }
+      .analytics-card { padding: 3rem !important; }
+      .container { max-width: 1400px !important; }
+    }
+    
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      .btn-back { min-height: 48px; }
+      .lang-btn { min-height: 44px; }
+      .form-select { min-height: 48px; }
+    }
+    
+    .chart-modal {
+      background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .chart-modal .modal-content {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+    }
+    
+    .chart-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      height: 350px;
+      position: relative;
+    }
+    
+    .chart-container canvas {
+      max-height: 250px !important;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-chart-line me-2"></i><span class="d-none d-sm-inline">{{ get_text('system_analytics') }}</span><span class="d-sm-none">Analytics</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <i class="fas fa-bars text-white"></i>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto d-flex align-items-lg-center">
+          <div class="language-switcher mt-3 mt-lg-0">
+            <a href="{{ url_for('set_language', lang='en') }}" class="lang-btn {% if current_lang == 'en' %}active{% endif %}">EN</a>
+            <a href="{{ url_for('set_language', lang='hi') }}" class="lang-btn {% if current_lang == 'hi' %}active{% endif %}">हि</a>
+            <a href="{{ url_for('set_language', lang='gu') }}" class="lang-btn {% if current_lang == 'gu' %}active{% endif %}">ગુ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 pt-4">
+    <a href="{{ url_for('admin') }}" class="btn-back mb-4">
+      <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_dashboard') }}
+    </a>
+
+    <h1 class="hero-title">{{ get_text('system_analytics') }}</h1>
+
+    <div class="analytics-card">
+      <div class="filter-section">
+        <div class="row align-items-center">
+          <div class="col-md-3">
+            <label class="form-label text-white fw-bold">{{ get_text('filter_by_class') }}:</label>
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" id="classFilter" onchange="filterByClass()">
+              <option value="all" {% if selected_class == 'all' %}selected{% endif %}>{{ get_text('all_classes') }}</option>
+              {% for class_name in all_classes %}
+              <option value="{{ class_name }}" {% if selected_class == class_name %}selected{% endif %}>
+                {{ get_text('class') }} {{ class_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-5">
+            <span class="text-white">
+              <i class="fas fa-users me-2"></i>{{ get_text('total_students') }}: {{ students|length }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="text-white text-center mb-4">
+        {% if selected_class == 'all' %}
+          {{ get_text('all_classes_overview') }}
+        {% else %}
+          {{ get_text('class') }} {{ selected_class }} {{ get_text('class_overview') }}
+        {% endif %}
+      </h3>
+      
+      {% for student in students %}
+      <div class="student-row">
+        <div class="row align-items-center">
+          <div class="col-md-1">
+            <strong style="color: white;">{{ student.roll }}</strong>
+          </div>
+          <div class="col-md-3">
+            <h6 style="color: white; margin: 0;">{{ student.name }}</h6>
+            <small style="color: rgba(255,255,255,0.7);">ID: {{ student.id }}</small>
+          </div>
+          <div class="col-md-2">
+            <span class="class-badge">{{ student.class }}</span>
+          </div>
+          <div class="col-md-2">
+            <span style="color: white;">{{ student.present }}/{{ student.total }}</span>
+          </div>
+          <div class="col-md-2">
+            <span class="percentage-badge 
+              {% if student.percentage >= 75 %}percentage-high
+              {% elif student.percentage >= 50 %}percentage-medium
+              {% else %}percentage-low{% endif %}">
+              {{ student.percentage }}%
+            </span>
+          </div>
+          <div class="col-md-2">
+            <button onclick="showStudentChart('{{ student.id }}', '{{ student.name }}', {{ student.present }}, {{ student.total - student.present }}, {{ student.percentage }})" 
+                    class="btn btn-sm btn-outline-light">
+              <i class="fas fa-chart-bar"></i> View
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      
+      {% if not students %}
+      <div class="text-center" style="color: rgba(255,255,255,0.7); padding: 2rem;">
+        <i class="fas fa-users fa-3x mb-3"></i>
+        <p>{{ get_text('students') }} not found</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Chart Modal -->
+  <div class="modal fade chart-modal" id="chartModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-white" id="chartModalTitle">Student Analytics</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4 mb-4">
+            <div class="col-md-3">
+              <div class="text-center text-white">
+                <div class="h3 text-success" id="presentDays">0</div>
+                <small>Days Present</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center text-white">
+                <div class="h3 text-danger" id="absentDays">0</div>
+                <small>Days Absent</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center text-white">
+                <div class="h3 text-info" id="totalDays">0</div>
+                <small>Total Days</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center text-white">
+                <div class="h3 text-warning" id="attendanceRate">0%</div>
+                <small>Attendance Rate</small>
+              </div>
+            </div>
+          </div>
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <div class="chart-container">
+                <h6 class="text-white text-center mb-3">Attendance Overview</h6>
+                <canvas id="attendanceChart" style="max-height: 250px;"></canvas>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="chart-container">
+                <h6 class="text-white text-center mb-3">Performance Status</h6>
+                <canvas id="performanceChart" style="max-height: 250px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function filterByClass() {
+      const selectedClass = document.getElementById('classFilter').value;
+      window.location.href = `{{ url_for('admin_analytics') }}?class=${selectedClass}`;
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function showError(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'alert alert-danger';
+      errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; background: rgba(255,107,107,0.9); color: white; padding: 1rem; border-radius: 10px;';
+      errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => errorDiv.remove(), 5000);
+    }
+
+    const navbar = document.getElementById('navbarNav');
+    if (navbar) {
+      navbar.addEventListener('show.bs.collapse', () => {
+        if (window.innerWidth < 992) document.body.style.paddingTop = '180px';
+      });
+      navbar.addEventListener('hide.bs.collapse', () => {
+        document.body.style.paddingTop = '0';
+      });
+    }
+
+    window.addEventListener('error', function(e) {
+      console.error('Page error:', e.error);
+      showError('An unexpected error occurred');
+    });
+
+    let attendanceChart, performanceChart;
+
+    function showStudentChart(studentId, studentName, present, absent, percentage) {
+      // Update modal title and stats
+      document.getElementById('chartModalTitle').textContent = `${studentName} - Analytics`;
+      document.getElementById('presentDays').textContent = present;
+      document.getElementById('absentDays').textContent = absent;
+      document.getElementById('totalDays').textContent = present + absent;
+      document.getElementById('attendanceRate').textContent = percentage + '%';
+
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('chartModal'));
+      modal.show();
+
+      // Create charts after modal is shown
+      setTimeout(() => {
+        createCharts(present, absent, percentage);
+      }, 300);
+    }
+
+    function createCharts(present, absent, percentage) {
+      // Destroy existing charts
+      if (attendanceChart) attendanceChart.destroy();
+      if (performanceChart) performanceChart.destroy();
+
+      // Attendance Pie Chart
+      const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+      attendanceChart = new Chart(attendanceCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Present', 'Absent'],
+          datasets: [{
+            data: [present, absent],
+            backgroundColor: ['#28a745', '#dc3545'],
+            borderWidth: 0,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: 'white', font: { size: 12 } }
+            }
+          }
+        }
+      });
+
+      // Performance Bar Chart
+      const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+      performanceChart = new Chart(performanceCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Attendance Rate'],
+          datasets: [{
+            label: 'Percentage',
+            data: [percentage],
+            backgroundColor: percentage >= 75 ? '#28a745' : percentage >= 50 ? '#ffc107' : '#dc3545',
+            borderRadius: 10,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { color: 'white' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            x: {
+              ticks: { color: 'white' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: 'white', font: { size: 12 } }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

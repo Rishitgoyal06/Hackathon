@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛡️ Admin Portal - Smart Attendance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1)) !important;
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 0 0 25px 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .navbar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.6rem;
+      background: linear-gradient(45deg, #fff, #ffeaa7, #fab1a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+    }
+
+    .navbar-text {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-text:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 4rem;
+      position: relative;
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #fff, #ffeaa7, #fab1a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+      margin-bottom: 1rem;
+      animation: glow 2s ease-in-out infinite alternate;
+      letter-spacing: -2px;
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3)); }
+      to { filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.6)); }
+    }
+
+    .hero-subtitle {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .feature-card::after {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: scale(0);
+      transition: transform 0.6s ease;
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-card:hover::after {
+      transform: scale(1);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-15px) scale(1.03);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .card-icon {
+      width: 90px;
+      height: 90px;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      font-size: 2.2rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-icon::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: rotate(45deg) translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .feature-card:hover .card-icon::before {
+      transform: rotate(45deg) translateX(100%);
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: white;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      letter-spacing: -0.5px;
+    }
+
+    .card-text {
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-action {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 1rem 2.5rem;
+      font-weight: 700;
+      color: white;
+      transition: all 0.4s ease;
+      text-decoration: none;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.9rem;
+    }
+
+    .btn-action::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.6s;
+    }
+
+    .btn-action:hover::before {
+      left: 100%;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.25));
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 12s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { width: 20px; height: 20px; top: 10%; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { width: 15px; height: 15px; top: 20%; right: 20%; animation-delay: 2s; }
+    .particle:nth-child(3) { width: 25px; height: 25px; top: 60%; left: 15%; animation-delay: 4s; }
+    .particle:nth-child(4) { width: 18px; height: 18px; bottom: 20%; right: 15%; animation-delay: 6s; }
+    .particle:nth-child(5) { width: 22px; height: 22px; bottom: 40%; left: 80%; animation-delay: 8s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+      25% { transform: translateY(-40px) rotate(90deg); opacity: 0.8; }
+      50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+      75% { transform: translateY(-60px) rotate(270deg); opacity: 0.6; }
+    }
+
+    /* Mobile phones (portrait) */
+    @media (max-width: 480px) {
+      .hero-title { font-size: 2rem; }
+      .hero-subtitle { font-size: 1rem; }
+      .feature-card { padding: 1.5rem 1rem; margin-bottom: 1rem; }
+      .card-icon { width: 70px; height: 70px; font-size: 1.8rem; }
+      .card-title { font-size: 1.2rem; }
+      .card-text { font-size: 0.9rem; margin-bottom: 1.5rem; }
+      .btn-action { padding: 0.8rem 1.5rem; font-size: 0.8rem; }
+      .navbar-brand { font-size: 1.3rem; }
+      .container { padding: 0 1rem; }
+    }
+
+    /* Mobile phones (landscape) and small tablets */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .hero-title { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1.1rem; }
+      .feature-card { padding: 2rem 1.5rem; }
+      .card-icon { width: 80px; height: 80px; font-size: 2rem; }
+      .card-title { font-size: 1.3rem; }
+      .navbar-brand { font-size: 1.4rem; }
+    }
+
+    /* Tablets (portrait) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hero-title { font-size: 3rem; }
+      .hero-subtitle { font-size: 1.2rem; }
+      .feature-card { padding: 2.5rem 2rem; }
+      .card-icon { width: 85px; height: 85px; font-size: 2.1rem; }
+      .container { max-width: 95%; }
+    }
+
+    /* Laptops and desktops */
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .hero-title { font-size: 3.5rem; }
+      .container { max-width: 1200px; }
+    }
+
+    /* Large desktops and 4K screens */
+    @media (min-width: 1441px) {
+      .hero-title { font-size: 4.5rem; }
+      .hero-subtitle { font-size: 1.5rem; }
+      .feature-card { padding: 3.5rem 3rem; }
+      .card-icon { width: 100px; height: 100px; font-size: 2.5rem; }
+      .container { max-width: 1400px; }
+    }
+
+    /* Mobile navbar improvements */
+    .navbar-toggler {
+      padding: 0.25rem 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-toggler:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .navbar-toggler:focus {
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+    }
+    
+    .nav-link-mobile {
+      padding: 0.5rem 0;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link-mobile:hover {
+      color: rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .navbar-text {
+        background: rgba(255, 255, 255, 0.05) !important;
+        padding: 0.75rem 1rem !important;
+        border-radius: 12px !important;
+        width: 100%;
+        text-align: center;
+      }
+      
+      .language-switcher {
+        justify-content: center;
+        width: 100%;
+      }
+      
+
+    }
+    
+    /* Mobile phones (portrait) - 320px to 480px */
+    @media (max-width: 480px) {
+      .hero-title { font-size: 2rem !important; line-height: 1.2; }
+      .hero-subtitle { font-size: 0.9rem !important; }
+      .feature-card { padding: 1.5rem 1rem !important; margin-bottom: 1rem; }
+      .card-icon { width: 60px !important; height: 60px !important; font-size: 1.5rem !important; }
+      .card-title { font-size: 1.1rem !important; }
+      .card-text { font-size: 0.85rem !important; margin-bottom: 1.5rem !important; }
+      .btn-action { padding: 0.8rem 1.5rem !important; font-size: 0.8rem !important; }
+      .navbar-brand { font-size: 1.2rem !important; }
+      .container { padding: 0 1rem !important; }
+      .language-switcher { gap: 0.2rem !important; }
+      .lang-btn { padding: 0.3rem 0.5rem !important; font-size: 0.7rem !important; }
+      
+      .navbar-toggler { padding: 0.2rem 0.4rem; }
+    }
+    
+    /* Mobile phones (landscape) - 481px to 768px */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .hero-title { font-size: 2.5rem !important; }
+      .hero-subtitle { font-size: 1rem !important; }
+      .feature-card { padding: 2rem 1.5rem !important; }
+      .card-icon { width: 70px !important; height: 70px !important; font-size: 1.8rem !important; }
+      .navbar-brand { font-size: 1.3rem !important; }
+    }
+    
+    /* Tablets (portrait) - 769px to 1024px */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hero-title { font-size: 3rem !important; }
+      .hero-subtitle { font-size: 1.1rem !important; }
+      .feature-card { padding: 2.5rem 2rem !important; }
+      .container { max-width: 95% !important; }
+    }
+    
+    /* Laptops - 1025px to 1440px */
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .hero-title { font-size: 3.5rem !important; }
+      .container { max-width: 1200px !important; }
+    }
+    
+    /* Large screens/4K - 1441px+ */
+    @media (min-width: 1441px) {
+      .hero-title { font-size: 4.5rem !important; }
+      .hero-subtitle { font-size: 1.4rem !important; }
+      .feature-card { padding: 3.5rem 3rem !important; }
+      .card-icon { width: 110px !important; height: 110px !important; font-size: 2.8rem !important; }
+      .container { max-width: 1400px !important; }
+    }
+    
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      .feature-card:hover { transform: none; }
+      .btn-action:hover { transform: none; }
+      .feature-card { transition: none; }
+      .btn-action { padding: 1.2rem 2.5rem; min-height: 48px; }
+      .lang-btn { min-height: 44px; }
+    }
+    
+    .language-switcher {
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.4rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .lang-btn {
+      padding: 0.5rem 0.8rem;
+      background: transparent;
+      border: none;
+      border-radius: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-weight: 700;
+      position: relative;
+      overflow: hidden;
+      min-width: 40px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    
+    .lang-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s;
+    }
+    
+    .lang-btn:hover::before {
+      left: 100%;
+    }
+    
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .lang-btn.active {
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .lang-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-user-shield me-2"></i><span class="d-none d-sm-inline">Admin Portal</span><span class="d-sm-none">Admin</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon-custom">
+          <i class="fas fa-bars text-white"></i>
+        </span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto d-flex align-items-lg-center">
+          <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3 gap-lg-2 mt-3 mt-lg-0">
+            <div class="language-switcher">
+              <a href="{{ url_for('set_language', lang='en') }}" class="lang-btn {% if current_lang == 'en' %}active{% endif %}">EN</a>
+              <a href="{{ url_for('set_language', lang='hi') }}" class="lang-btn {% if current_lang == 'hi' %}active{% endif %}">हि</a>
+              <a href="{{ url_for('set_language', lang='gu') }}" class="lang-btn {% if current_lang == 'gu' %}active{% endif %}">ગુ</a>
+            </div>
+            <div class="nav-icon">
+              <a href="{{ url_for('logout') }}" class="text-white d-flex align-items-center">
+                <i class="fas fa-sign-out-alt me-2"></i><span class="d-lg-none">Logout</span>
+              </a>
+            </div>
+          </div>
+          <span class="navbar-text text-white mt-3 mt-lg-0 ms-lg-3">
+            <i class="fas fa-user-circle me-2"></i>{{ admin.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 pt-4">
+    <div class="hero-section">
+      <h1 class="hero-title">{{ get_text('admin_control_center') }}</h1>
+      <p class="hero-subtitle">{{ get_text('advanced_system_admin') }}</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <div class="feature-card">
+          <div class="card-icon bg-primary">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <h5 class="card-title">{{ get_text('add_new_teacher') }}</h5>
+          <p class="card-text">{{ get_text('register_new_teachers') }}</p>
+          <a href="#" class="btn-action" onclick="showAddTeacherForm()">
+            <i class="fas fa-plus me-2"></i>{{ get_text('add_teacher') }}
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="feature-card">
+          <div class="card-icon bg-success">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <h5 class="card-title">{{ get_text('government_reports') }}</h5>
+          <p class="card-text">{{ get_text('midday_meal_enrollment') }}</p>
+          <a href="{{ url_for('government_reports') }}" class="btn-action">
+            <i class="fas fa-file-alt me-2"></i>{{ get_text('view_reports') }}
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="feature-card">
+          <div class="card-icon bg-warning">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h5 class="card-title">{{ get_text('system_analytics') }}</h5>
+          <p class="card-text">{{ get_text('comprehensive_system_reports') }}</p>
+          <a href="{{ url_for('admin_analytics') }}" class="btn-action">
+            <i class="fas fa-chart-bar me-2"></i>{{ get_text('view_reports') }}
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="feature-card">
+          <div class="card-icon bg-info">
+            <i class="fas fa-users"></i>
+          </div>
+          <h5 class="card-title">{{ get_text('teacher_records') }}</h5>
+          <p class="card-text">{{ get_text('view_manage_teacher_records') }}</p>
+          <a href="{{ url_for('teacher_records') }}" class="btn-action">
+            <i class="fas fa-list me-2"></i>{{ get_text('view_records') }}
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const navbar = document.getElementById('navbarNav');
+    if (navbar) {
+      navbar.addEventListener('show.bs.collapse', () => {
+        if (window.innerWidth < 992) document.body.style.paddingTop = '180px';
+      });
+      navbar.addEventListener('hide.bs.collapse', () => {
+        document.body.style.paddingTop = '0';
+      });
+    }
+  </script>
+  <script>
+    function showAddTeacherForm() {
+      // Create and show modal with teacher form
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+          <div class="modal-content" style="background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.25);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+              <h5 class="modal-title text-white"><i class="fas fa-user-plus me-2"></i>{{ get_text('add_new_teacher') }}</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="teacherForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label text-white">{{ get_text('teacher_name') }}</label>
+                    <input type="text" name="name" class="form-control" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white;" placeholder="{{ get_text('enter_full_name') }}" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label text-white">{{ get_text('date_of_birth') }}</label>
+                    <input type="date" name="dob" class="form-control" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white;" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label text-white">{{ get_text('email_address') }}</label>
+                    <input type="email" name="email" class="form-control" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white;" placeholder="{{ get_text('enter_email') }}" required onblur="checkEmail(this.value)">
+                    <div id="emailStatus" class="mt-1"></div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label text-white">{{ get_text('phone_number') }}</label>
+                    <input type="tel" class="form-control" name="phone" placeholder="{{ get_text('digit_phone_number') }}" required pattern="[0-9]{10}" maxlength="10" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white;" onblur="checkPhone(this.value)">
+                    <div id="phoneStatus" class="mt-1"></div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-white">{{ get_text('gender') }}</label>
+                  <select name="gender" class="form-select" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white;" required>
+                    <option value="" style="background: #34495e; color: white;">{{ get_text('select_gender') }}</option>
+                    <option value="male" style="background: #34495e; color: white;">{{ get_text('male') }}</option>
+                    <option value="female" style="background: #34495e; color: white;">{{ get_text('female') }}</option>
+                    <option value="other" style="background: #34495e; color: white;">{{ get_text('other') }}</option>
+                    <option value="prefer-not-to-say" style="background: #34495e; color: white;">{{ get_text('prefer_not_to_say') }}</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-white">{{ get_text('class') }}</label>
+                  <select name="class" class="form-select" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white;" required>
+                    <option value="" style="background: #34495e; color: white;">{{ get_text('select_class') }}</option>
+                    <option value="1st" style="background: #34495e; color: white;">1st</option>
+                    <option value="2nd" style="background: #34495e; color: white;">2nd</option>
+                    <option value="3rd" style="background: #34495e; color: white;">3rd</option>
+                    <option value="4th" style="background: #34495e; color: white;">4th</option>
+                    <option value="5th" style="background: #34495e; color: white;">5th</option>
+                    <option value="6th" style="background: #34495e; color: white;">6th</option>
+                    <option value="7th" style="background: #34495e; color: white;">7th</option>
+                    <option value="8th" style="background: #34495e; color: white;">8th</option>
+                    <option value="9th" style="background: #34495e; color: white;">9th</option>
+                    <option value="10th" style="background: #34495e; color: white;">10th</option>
+                    <option value="11th" style="background: #34495e; color: white;">11th</option>
+                    <option value="12th" style="background: #34495e; color: white;">12th</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.2);">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ get_text('cancel') }}</button>
+              <button type="button" class="btn" style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white;" onclick="submitTeacherForm()">{{ get_text('add_teacher') }}</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const bootstrapModal = new bootstrap.Modal(modal);
+      bootstrapModal.show();
+      
+      // Remove modal from DOM when hidden
+      modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+      });
+    }  </script>
+<script>
+function showNotification(message, type = 'success') {
+  const notifDiv = document.createElement('div');
+  notifDiv.className = 'alert';
+  const bgColor = type === 'success' ? 'rgba(40,167,69,0.9)' : 'rgba(255,107,107,0.9)';
+  notifDiv.style.cssText = `position: fixed; top: 20px; right: 20px; z-index: 9999; background: ${bgColor}; color: white; padding: 1rem; border-radius: 10px;`;
+  notifDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>${message}`;
+  document.body.appendChild(notifDiv);
+  setTimeout(() => notifDiv.remove(), 4000);
+}
+
+function submitTeacherForm() {
+    const form = document.getElementById("teacherForm");
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    // Validation
+    const required = ['name', 'dob', 'email', 'phone', 'gender', 'class'];
+    for (let field of required) {
+        if (!formData.get(field)) {
+            showNotification(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`, 'error');
+            return;
+        }
+    }
+
+    // Validate all fields at once
+    fetch('/validate-teacher', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(result => {
+        if (!result.valid) {
+            const errors = Object.values(result.conflicts);
+            showNotification(errors[0], 'error');
+            return;
+        }
+        addTeacherToSystem(data);
+    })
+    .catch(err => {
+        console.error('Error validating:', err);
+        showNotification('Error validating data', 'error');
+    });
+}
+
+function checkEmail(email) {
+    if (!email) return;
+    fetch(`/check-teacher-email?email=${email}`)
+    .then(r => r.json())
+    .then(result => {
+        const status = document.getElementById('emailStatus');
+        status.innerHTML = result.exists ? 
+            '<small class="text-danger"><i class="fas fa-times"></i> Email already exists</small>' :
+            '<small class="text-success"><i class="fas fa-check"></i> Email available</small>';
+    });
+}
+
+function checkPhone(phone) {
+    if (!phone || phone.length !== 10) return;
+    fetch(`/check-teacher-phone?phone=${phone}`)
+    .then(r => r.json())
+    .then(result => {
+        const status = document.getElementById('phoneStatus');
+        status.innerHTML = result.exists ? 
+            '<small class="text-danger"><i class="fas fa-times"></i> Phone already exists</small>' :
+            '<small class="text-success"><i class="fas fa-check"></i> Phone available</small>';
+    });
+}
+
+function addTeacherToSystem(data) {
+    fetch("/add-teacher", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network error');
+        return response.json();
+    })
+    .then(result => {
+        showNotification(result.message, result.status === 'success' ? 'success' : 'error');
+        if(result.status === "success") {
+            const modalEl = bootstrap.Modal.getInstance(document.querySelector('.modal'));
+            modalEl.hide();
+            document.getElementById('teacherForm').reset();
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showNotification("Error adding teacher. Please try again.", 'error');
+    });
+}
+</script>
+
+</body>
+</html>
+  </script>
+</body>
+</html>

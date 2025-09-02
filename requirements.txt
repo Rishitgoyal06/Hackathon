@@ -1,0 +1,10 @@
+numpy
+opencv-python
+dlib
+scipy
+face-recognition
+flask
+flask-cors
+matplotlib
+plotly
+kaleido
